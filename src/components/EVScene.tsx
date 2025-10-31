@@ -6,9 +6,10 @@ import { Terrain } from './Terrain';
 interface EVSceneProps {
   speed: number;
   terrain: 'city' | 'highway' | 'hills';
+  isEngineOn: boolean;
 }
 
-export const EVScene = ({ speed, terrain }: EVSceneProps) => {
+export const EVScene = ({ speed, terrain, isEngineOn }: EVSceneProps) => {
   return (
     <div className="w-full h-full">
       <Canvas shadows>
@@ -35,8 +36,8 @@ export const EVScene = ({ speed, terrain }: EVSceneProps) => {
         <Environment preset="night" />
         
         {/* Scene objects */}
-        <Terrain terrain={terrain} />
-        <Car speed={speed} />
+        <Terrain terrain={terrain} speed={speed} />
+        <Car speed={speed} isEngineOn={isEngineOn} />
         
         {/* Ground */}
         <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow>

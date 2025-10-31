@@ -76,7 +76,7 @@ const Index = () => {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           },
           body: JSON.stringify({
             battery: Math.round(battery),
@@ -107,7 +107,7 @@ const Index = () => {
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-background">
       {/* 3D Scene */}
-      <EVScene speed={speed} terrain={terrain} />
+      <EVScene speed={speed} terrain={terrain} isEngineOn={isEngineOn} />
       
       {/* HUD Overlay */}
       <HUD

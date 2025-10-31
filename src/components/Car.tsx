@@ -4,9 +4,10 @@ import { Mesh, Group } from 'three';
 
 interface CarProps {
   speed: number;
+  isEngineOn: boolean;
 }
 
-export const Car = ({ speed }: CarProps) => {
+export const Car = ({ speed, isEngineOn }: CarProps) => {
   const carRef = useRef<Group>(null);
   const wheelsRef = useRef<Mesh[]>([]);
   
@@ -16,13 +17,18 @@ export const Car = ({ speed }: CarProps) => {
     // Subtle hovering animation
     carRef.current.position.y = Math.sin(state.clock.elapsedTime * 2) * 0.02 + 0.5;
     
-    // Rotate wheels based on speed
-    const rotationSpeed = (speed / 100) * delta * 10;
-    wheelsRef.current.forEach(wheel => {
-      if (wheel) {
-        wheel.rotation.x += rotationSpeed;
-      }
-    });
+    // Rotate wheels based on speed and engine state
+    if (isEngineOn && speed > 0) {
+      const rotationSpeed = (speed / 50) * delta * 10;
+      wheelsRef.current.forEach(wheel => {
+        if (wheel) {
+          wheel.rotation.x += rotationSpeed;
+        }
+      });
+      
+      // Add slight tilt based on speed
+      carRef.current.rotation.x = -speed * 0.001;
+    }
   });
   
   return (
