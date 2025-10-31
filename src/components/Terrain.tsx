@@ -9,6 +9,7 @@ interface TerrainProps {
 
 export const Terrain = ({ terrain, speed }: TerrainProps) => {
   const terrainRef = useRef<Group>(null);
+  const groundRef = useRef<Mesh>(null);
   
   useFrame((state, delta) => {
     if (!terrainRef.current || speed === 0) return;
@@ -21,6 +22,13 @@ export const Terrain = ({ terrain, speed }: TerrainProps) => {
       terrainRef.current.position.z = 0;
     }
   });
+  
+  // Create dynamic ground elevation for hills
+  const getGroundHeight = (z: number) => {
+    if (terrain !== 'hills') return 0;
+    // Create wavy terrain for hills
+    return Math.sin(z * 0.1) * 3 + Math.cos(z * 0.15) * 2;
+  };
   
   if (terrain === 'city') {
     return (
@@ -142,46 +150,86 @@ export const Terrain = ({ terrain, speed }: TerrainProps) => {
     );
   }
   
-  // Hills terrain
+  // Hills terrain with actual elevation
   return (
     <group ref={terrainRef}>
-      {Array.from({ length: 20 }).map((_, i) => {
-        const x = (i % 4) * 10 - 15 + Math.random() * 5;
-        const z = Math.floor(i / 4) * -15 - 10;
-        const height = Math.random() * 5 + 3;
-        const radius = Math.random() * 4 + 3;
+      {/* Create wavy ground segments */}
+      {Array.from({ length: 50 }).map((_, i) => {
+        const z = i * -2;
+        const height = getGroundHeight(z);
+        const nextHeight = getGroundHeight(z - 2);
+        const avgHeight = (height + nextHeight) / 2;
+        const slope = (nextHeight - height) / 2;
+        
         return (
-          <mesh key={i} position={[x, height / 2, z]} castShadow>
-            <coneGeometry args={[radius, height, 8]} />
+          <mesh 
+            key={`ground-${i}`} 
+            position={[0, avgHeight, z - 1]} 
+            rotation={[-Math.PI / 2 + slope * 0.3, 0, 0]}
+            receiveShadow
+          >
+            <planeGeometry args={[20, 2, 4, 4]} />
             <meshStandardMaterial 
-              color="#2d4a3e"
+              color="#3a5f30"
               roughness={0.9}
             />
           </mesh>
         );
       })}
-      {/* Rocks */}
-      {Array.from({ length: 15 }).map((_, i) => {
-        const x = Math.random() * 20 - 10;
-        const z = i * -10;
+      
+      {/* Hills on sides */}
+      {Array.from({ length: 20 }).map((_, i) => {
+        const side = i % 2 === 0 ? -1 : 1;
+        const x = side * (8 + Math.random() * 4);
+        const z = i * -10 - 10;
+        const groundHeight = getGroundHeight(z);
+        const height = Math.random() * 8 + 5;
+        const radius = Math.random() * 5 + 4;
+        
         return (
-          <mesh key={`rock-${i}`} position={[x, 0.5, z]} castShadow>
-            <dodecahedronGeometry args={[Math.random() * 0.5 + 0.3, 0]} />
+          <mesh key={i} position={[x, groundHeight + height / 2, z]} castShadow>
+            <coneGeometry args={[radius, height, 8]} />
+            <meshStandardMaterial 
+              color="#2d5a3e"
+              roughness={0.85}
+            />
+          </mesh>
+        );
+      })}
+      
+      {/* Rocks on terrain */}
+      {Array.from({ length: 25 }).map((_, i) => {
+        const x = (Math.random() - 0.5) * 18;
+        const z = i * -8;
+        const groundHeight = getGroundHeight(z);
+        return (
+          <mesh key={`rock-${i}`} position={[x, groundHeight + 0.3, z]} castShadow>
+            <dodecahedronGeometry args={[Math.random() * 0.6 + 0.3, 0]} />
             <meshStandardMaterial color="#5a5a5a" roughness={0.8} />
           </mesh>
         );
       })}
-      {/* Grass patches */}
-      {Array.from({ length: 30 }).map((_, i) => (
-        <mesh 
-          key={`grass-${i}`} 
-          position={[Math.random() * 20 - 10, 0.01, i * -5]} 
-          rotation={[-Math.PI / 2, 0, 0]}
-        >
-          <circleGeometry args={[2, 16]} />
-          <meshStandardMaterial color="#3a5f30" roughness={1} />
-        </mesh>
-      ))}
+      
+      {/* Trees scattered on hills */}
+      {Array.from({ length: 15 }).map((_, i) => {
+        const side = i % 2 === 0 ? -1 : 1;
+        const x = side * (6 + Math.random() * 3);
+        const z = i * -12;
+        const groundHeight = getGroundHeight(z);
+        
+        return (
+          <group key={`tree-${i}`} position={[x, groundHeight, z]}>
+            <mesh position={[0, 1.5, 0]} castShadow>
+              <cylinderGeometry args={[0.3, 0.4, 3, 8]} />
+              <meshStandardMaterial color="#4a3728" />
+            </mesh>
+            <mesh position={[0, 3.5, 0]} castShadow>
+              <coneGeometry args={[1.5, 3, 8]} />
+              <meshStandardMaterial color="#2d5016" />
+            </mesh>
+          </group>
+        );
+      })}
     </group>
   );
 };

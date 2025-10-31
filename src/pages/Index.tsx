@@ -96,6 +96,11 @@ const Index = () => {
       setAiAnalysis(data.aiAnalysis);
       toast.success("AI analysis complete!");
       
+      // Auto-dismiss after 10 seconds
+      setTimeout(() => {
+        setAiAnalysis(undefined);
+      }, 10000);
+      
     } catch (error) {
       console.error('Error analyzing range:', error);
       toast.error("Failed to analyze range. Please try again.");
@@ -119,6 +124,7 @@ const Index = () => {
         weather={weather}
         aiAnalysis={aiAnalysis}
         isAnalyzing={isAnalyzing}
+        onDismissAnalysis={() => setAiAnalysis(undefined)}
       />
       
       {/* Controls */}

@@ -5,17 +5,25 @@ import { Mesh, Group } from 'three';
 interface CarProps {
   speed: number;
   isEngineOn: boolean;
+  terrain: 'city' | 'highway' | 'hills';
 }
 
-export const Car = ({ speed, isEngineOn }: CarProps) => {
+export const Car = ({ speed, isEngineOn, terrain }: CarProps) => {
   const carRef = useRef<Group>(null);
   const wheelsRef = useRef<Mesh[]>([]);
   
   useFrame((state, delta) => {
     if (!carRef.current) return;
     
+    // Calculate terrain-based position for hills
+    let baseY = 0.5;
+    if (terrain === 'hills' && isEngineOn && speed > 0) {
+      // Simulate going up and down hills
+      baseY = 0.5 + Math.sin(state.clock.elapsedTime * (speed / 50)) * 1.5;
+    }
+    
     // Subtle hovering animation
-    carRef.current.position.y = Math.sin(state.clock.elapsedTime * 2) * 0.02 + 0.5;
+    carRef.current.position.y = baseY + Math.sin(state.clock.elapsedTime * 2) * 0.02;
     
     // Rotate wheels based on speed and engine state
     if (isEngineOn && speed > 0) {
@@ -26,8 +34,12 @@ export const Car = ({ speed, isEngineOn }: CarProps) => {
         }
       });
       
-      // Add slight tilt based on speed
-      carRef.current.rotation.x = -speed * 0.001;
+      // Add tilt based on terrain and speed
+      if (terrain === 'hills') {
+        carRef.current.rotation.x = Math.sin(state.clock.elapsedTime * (speed / 50)) * 0.15 - speed * 0.001;
+      } else {
+        carRef.current.rotation.x = -speed * 0.001;
+      }
     }
   });
   

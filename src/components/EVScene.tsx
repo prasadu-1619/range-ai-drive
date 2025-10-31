@@ -37,7 +37,7 @@ export const EVScene = ({ speed, terrain, isEngineOn }: EVSceneProps) => {
         
         {/* Scene objects */}
         <Terrain terrain={terrain} speed={speed} />
-        <Car speed={speed} isEngineOn={isEngineOn} />
+        <Car speed={speed} isEngineOn={isEngineOn} terrain={terrain} />
         
         {/* Ground */}
         <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow>
