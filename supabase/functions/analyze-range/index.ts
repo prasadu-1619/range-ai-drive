@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { battery, speed, terrain, acOn, weather } = await req.json();
+    const { battery, speed, terrain, acMode, weather, timeOfDay, headlightsOn, distance } = await req.json();
     
     // Calculate base range based on battery percentage
     const maxRange = 400; // km
@@ -27,9 +27,8 @@ serve(async (req) => {
     estimatedRange *= terrainModifiers[terrain as keyof typeof terrainModifiers] || 1.0;
     
     // Apply AC modifier
-    if (acOn) {
-      estimatedRange *= 0.9;
-    }
+    const acMultiplier = acMode === 'high' ? 0.85 : acMode === 'medium' ? 0.9 : acMode === 'low' ? 0.95 : 1.0;
+    estimatedRange *= acMultiplier;
     
     // Apply weather modifier
     const weatherModifiers = {
@@ -39,6 +38,11 @@ serve(async (req) => {
     };
     estimatedRange *= weatherModifiers[weather as keyof typeof weatherModifiers] || 1.0;
     
+    // Apply headlights modifier
+    if (headlightsOn) {
+      estimatedRange *= 0.97;
+    }
+    
     // Apply speed modifier (efficiency drops at high speeds)
     if (speed > 80) {
       estimatedRange *= 0.85;
@@ -47,6 +51,10 @@ serve(async (req) => {
     }
     
     estimatedRange = Math.round(estimatedRange);
+    
+    // Calculate next charging station
+    const nextStation = Math.ceil(distance / 100) * 100;
+    const distanceToNext = nextStation - distance;
     
     // Call Lovable AI (Gemini) for analysis
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
@@ -58,12 +66,15 @@ serve(async (req) => {
 
 Battery: ${battery}%
 Speed: ${speed} km/h
-Terrain: ${terrain}
-AC Status: ${acOn ? 'ON' : 'OFF'}
+Distance Traveled: ${distance.toFixed(1)} km
+Terrain: ${terrain} (${terrain === 'hills' ? 'Uphill/downhill terrain increases energy use' : terrain === 'city' ? 'Frequent stops reduce efficiency' : 'Optimal for highway cruising'})
+AC Mode: ${acMode.toUpperCase()} ${acMode !== 'off' ? '(consuming extra energy)' : ''}
 Weather: ${weather}
+Time of Day: ${timeOfDay} ${headlightsOn ? '(headlights on)' : ''}
 Calculated Range: ${estimatedRange} km
+Next Charging Station: ${distanceToNext.toFixed(0)} km away
 
-Explain the estimated range and give 1-2 specific tips to improve efficiency. Be concise and practical.`;
+Analyze current driving efficiency, mention if they'll reach the next charging station, and give 1-2 specific actionable tips to maximize range. Be concise and practical.`;
     
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',

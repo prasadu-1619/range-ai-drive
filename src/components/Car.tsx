@@ -6,9 +6,10 @@ interface CarProps {
   speed: number;
   isEngineOn: boolean;
   terrain: 'city' | 'highway' | 'hills';
+  headlightsOn: boolean;
 }
 
-export const Car = ({ speed, isEngineOn, terrain }: CarProps) => {
+export const Car = ({ speed, isEngineOn, terrain, headlightsOn }: CarProps) => {
   const carRef = useRef<Group>(null);
   const wheelsRef = useRef<Mesh[]>([]);
   
@@ -91,14 +92,44 @@ export const Car = ({ speed, isEngineOn, terrain }: CarProps) => {
       ))}
       
       {/* Headlights */}
-      <pointLight position={[0, 0, 2.2]} intensity={1} color="#ffffff" distance={10} />
+      {headlightsOn && (
+        <>
+          <pointLight position={[0, 0, 2.2]} intensity={3} color="#ffffff" distance={15} />
+          <spotLight 
+            position={[-0.6, 0, 2.1]}
+            angle={0.6}
+            penumbra={0.5}
+            intensity={2}
+            distance={20}
+            color="#ffffff"
+            target-position={[-2, 0, 10] as any}
+          />
+          <spotLight 
+            position={[0.6, 0, 2.1]}
+            angle={0.6}
+            penumbra={0.5}
+            intensity={2}
+            distance={20}
+            color="#ffffff"
+            target-position={[2, 0, 10] as any}
+          />
+        </>
+      )}
       <mesh position={[-0.6, 0, 2.1]}>
         <sphereGeometry args={[0.1, 16, 16]} />
-        <meshStandardMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={2} />
+        <meshStandardMaterial 
+          color="#ffffff" 
+          emissive="#ffffff" 
+          emissiveIntensity={headlightsOn ? 3 : 0.5} 
+        />
       </mesh>
       <mesh position={[0.6, 0, 2.1]}>
         <sphereGeometry args={[0.1, 16, 16]} />
-        <meshStandardMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={2} />
+        <meshStandardMaterial 
+          color="#ffffff" 
+          emissive="#ffffff" 
+          emissiveIntensity={headlightsOn ? 3 : 0.5} 
+        />
       </mesh>
       
       {/* Taillights */}
