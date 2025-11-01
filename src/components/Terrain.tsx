@@ -150,10 +150,10 @@ export const Terrain = ({ terrain, speed }: TerrainProps) => {
     );
   }
   
-  // Hills terrain with actual elevation
+  // Hills terrain with proper road and slopes
   return (
     <group ref={terrainRef}>
-      {/* Create wavy ground segments */}
+      {/* Road segments with proper slopes */}
       {Array.from({ length: 50 }).map((_, i) => {
         const z = i * -2;
         const height = getGroundHeight(z);
@@ -162,18 +162,55 @@ export const Terrain = ({ terrain, speed }: TerrainProps) => {
         const slope = (nextHeight - height) / 2;
         
         return (
-          <mesh 
-            key={`ground-${i}`} 
-            position={[0, avgHeight, z - 1]} 
-            rotation={[-Math.PI / 2 + slope * 0.3, 0, 0]}
-            receiveShadow
-          >
-            <planeGeometry args={[20, 2, 4, 4]} />
-            <meshStandardMaterial 
-              color="#3a5f30"
-              roughness={0.9}
-            />
-          </mesh>
+          <group key={`road-segment-${i}`}>
+            {/* Main road surface */}
+            <mesh 
+              position={[0, avgHeight, z - 1]} 
+              rotation={[-Math.PI / 2 + slope * 0.15, 0, 0]}
+              receiveShadow
+            >
+              <planeGeometry args={[6, 2, 4, 4]} />
+              <meshStandardMaterial 
+                color="#2a2a2e"
+                roughness={0.8}
+              />
+            </mesh>
+            
+            {/* Road markings */}
+            <mesh 
+              position={[0, avgHeight + 0.01, z - 1]} 
+              rotation={[-Math.PI / 2 + slope * 0.15, 0, 0]}
+            >
+              <planeGeometry args={[0.2, 1.5]} />
+              <meshStandardMaterial 
+                color="#ffffff"
+                emissive="#ffffff"
+                emissiveIntensity={0.3}
+              />
+            </mesh>
+            
+            {/* Grass on sides */}
+            <mesh 
+              position={[-5, avgHeight, z - 1]} 
+              rotation={[-Math.PI / 2 + slope * 0.15, 0, 0]}
+            >
+              <planeGeometry args={[8, 2, 4, 4]} />
+              <meshStandardMaterial 
+                color="#3a5f30"
+                roughness={0.9}
+              />
+            </mesh>
+            <mesh 
+              position={[5, avgHeight, z - 1]} 
+              rotation={[-Math.PI / 2 + slope * 0.15, 0, 0]}
+            >
+              <planeGeometry args={[8, 2, 4, 4]} />
+              <meshStandardMaterial 
+                color="#3a5f30"
+                roughness={0.9}
+              />
+            </mesh>
+          </group>
         );
       })}
       

@@ -60,6 +60,24 @@ const Index = () => {
     return () => clearInterval(accelerationInterval);
   }, [isEngineOn, speed]);
 
+  // Regenerative braking - charge battery when slowing down
+  useEffect(() => {
+    if (!isEngineOn || isCharging) return;
+    
+    let prevSpeed = speed;
+    const regenInterval = setInterval(() => {
+      const speedDiff = prevSpeed - speed;
+      if (speedDiff > 0) {
+        // Regenerative braking - recover some energy
+        const regenAmount = speedDiff * 0.0005;
+        setBattery(prev => Math.min(100, prev + regenAmount));
+      }
+      prevSpeed = speed;
+    }, 100);
+    
+    return () => clearInterval(regenInterval);
+  }, [isEngineOn, speed, isCharging]);
+
   // Simulate battery drain and distance tracking
   useEffect(() => {
     if (!isEngineOn || speed === 0 || isCharging) return;
@@ -87,8 +105,8 @@ const Index = () => {
       setDistance(prev => {
         const newDistance = prev + (speed * 0.1) / 3600; // Convert to km
         
-        // Check for charging station every 100 km
-        if (Math.floor(newDistance / 100) > Math.floor(prev / 100)) {
+        // Check for charging station every 5 km
+        if (Math.floor(newDistance / 5) > Math.floor(prev / 5)) {
           setSpeed(0);
           setIsCharging(true);
           toast.success("🔋 Charging station reached! Time to recharge.");
@@ -196,6 +214,7 @@ const Index = () => {
         isEngineOn={isEngineOn} 
         timeOfDay={timeOfDay}
         headlightsOn={headlightsOn}
+        weather={weather}
       />
       
       {/* HUD Overlay */}

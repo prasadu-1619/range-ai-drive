@@ -53,7 +53,7 @@ serve(async (req) => {
     estimatedRange = Math.round(estimatedRange);
     
     // Calculate next charging station
-    const nextStation = Math.ceil(distance / 100) * 100;
+    const nextStation = Math.ceil(distance / 5) * 5;
     const distanceToNext = nextStation - distance;
     
     // Call Lovable AI (Gemini) for analysis
@@ -62,19 +62,20 @@ serve(async (req) => {
       throw new Error('LOVABLE_API_KEY not configured');
     }
     
-    const prompt = `You are an EV efficiency assistant. Analyze this driving data and provide a brief, actionable response (2-3 sentences max):
+    const prompt = `You are an EV efficiency assistant. Analyze this driving data and provide a brief, actionable response (3-4 sentences max):
 
 Battery: ${battery}%
 Speed: ${speed} km/h
 Distance Traveled: ${distance.toFixed(1)} km
-Terrain: ${terrain} (${terrain === 'hills' ? 'Uphill/downhill terrain increases energy use' : terrain === 'city' ? 'Frequent stops reduce efficiency' : 'Optimal for highway cruising'})
+Terrain: ${terrain} (${terrain === 'hills' ? 'Road with slopes - requires more power on uphills' : terrain === 'city' ? 'Frequent stops reduce efficiency' : 'Optimal for highway cruising'})
 AC Mode: ${acMode.toUpperCase()} ${acMode !== 'off' ? '(consuming extra energy)' : ''}
-Weather: ${weather}
-Time of Day: ${timeOfDay} ${headlightsOn ? '(headlights on)' : ''}
-Calculated Range: ${estimatedRange} km
-Next Charging Station: ${distanceToNext.toFixed(0)} km away
+Weather: ${weather} ${weather === 'rainy' ? '(rain reduces efficiency)' : weather === 'sunny' ? '(ideal conditions)' : ''}
+Time of Day: ${timeOfDay} ${headlightsOn ? '(headlights consuming energy)' : ''}
+Estimated Range: ${estimatedRange} km
+Next Charging Station: ${distanceToNext.toFixed(1)} km away
+Regenerative Braking: Active (charges battery when slowing down)
 
-Analyze current driving efficiency, mention if they'll reach the next charging station, and give 1-2 specific actionable tips to maximize range. Be concise and practical.`;
+START your response with "Estimated Range: ${estimatedRange} km. " Then analyze current driving efficiency, mention if they'll reach the next charging station, and give 1-2 specific actionable tips to maximize range. Be concise and practical.`;
     
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
