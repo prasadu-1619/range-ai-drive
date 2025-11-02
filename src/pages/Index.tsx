@@ -3,7 +3,6 @@ import { EVScene } from '@/components/EVScene';
 import { HUD } from '@/components/HUD';
 import { Controls } from '@/components/Controls';
 import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
 
 const Index = () => {
   const [isEngineOn, setIsEngineOn] = useState(false);
@@ -152,8 +151,10 @@ const Index = () => {
     setAiAnalysis(undefined);
     
     try {
-      const { data, error } = await supabase.functions.invoke('analyze-range', {
-        body: {
+      const response = await fetch('https://rcbhypwzhibjxvetpxod.supabase.co/functions/v1/analyze-range', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
           battery: Math.round(battery),
           speed,
           terrain,
@@ -162,14 +163,16 @@ const Index = () => {
           timeOfDay,
           headlightsOn,
           distance: Math.round(distance)
-        }
+        })
       });
       
-      if (error) {
-        console.error('Supabase function error:', error);
-        throw new Error(error.message || 'Failed to analyze range');
+      if (!response.ok) {
+        const t = await response.text();
+        console.error('Edge function error:', response.status, t);
+        throw new Error('Failed to analyze range');
       }
       
+      const data = await response.json();
       setAiAnalysis(data.aiAnalysis);
       toast.success("AI analysis complete!");
       
