@@ -155,61 +155,103 @@ export const Terrain = ({ terrain, speed }: TerrainProps) => {
     <group ref={terrainRef}>
       {/* Road segments with proper slopes */}
       {Array.from({ length: 50 }).map((_, i) => {
-        const z = i * -2;
+        const z = i * -3;
         const height = getGroundHeight(z);
-        const nextHeight = getGroundHeight(z - 2);
+        const nextHeight = getGroundHeight(z - 3);
         const avgHeight = (height + nextHeight) / 2;
-        const slope = (nextHeight - height) / 2;
+        const slope = Math.atan2(nextHeight - height, 3);
         
         return (
           <group key={`road-segment-${i}`}>
-            {/* Main road surface */}
+            {/* Main road surface - wider and smoother */}
             <mesh 
-              position={[0, avgHeight, z - 1]} 
-              rotation={[-Math.PI / 2 + slope * 0.15, 0, 0]}
+              position={[0, avgHeight, z - 1.5]} 
+              rotation={[-Math.PI / 2 + slope, 0, 0]}
               receiveShadow
             >
-              <planeGeometry args={[6, 2, 4, 4]} />
+              <planeGeometry args={[7, 3, 8, 8]} />
               <meshStandardMaterial 
                 color="#2a2a2e"
                 roughness={0.8}
               />
             </mesh>
             
-            {/* Road markings */}
+            {/* Center lane markings */}
             <mesh 
-              position={[0, avgHeight + 0.01, z - 1]} 
-              rotation={[-Math.PI / 2 + slope * 0.15, 0, 0]}
+              position={[0, avgHeight + 0.02, z - 1.5]} 
+              rotation={[-Math.PI / 2 + slope, 0, 0]}
             >
-              <planeGeometry args={[0.2, 1.5]} />
+              <planeGeometry args={[0.15, 2]} />
               <meshStandardMaterial 
-                color="#ffffff"
-                emissive="#ffffff"
-                emissiveIntensity={0.3}
+                color="#ffdd00"
+                emissive="#ffdd00"
+                emissiveIntensity={0.4}
               />
             </mesh>
             
-            {/* Grass on sides */}
+            {/* Side lane markings */}
+            {i % 2 === 0 && (
+              <>
+                <mesh 
+                  position={[-3, avgHeight + 0.02, z - 1.5]} 
+                  rotation={[-Math.PI / 2 + slope, 0, 0]}
+                >
+                  <planeGeometry args={[0.2, 1.5]} />
+                  <meshStandardMaterial 
+                    color="#ffffff"
+                    emissive="#ffffff"
+                    emissiveIntensity={0.3}
+                  />
+                </mesh>
+                <mesh 
+                  position={[3, avgHeight + 0.02, z - 1.5]} 
+                  rotation={[-Math.PI / 2 + slope, 0, 0]}
+                >
+                  <planeGeometry args={[0.2, 1.5]} />
+                  <meshStandardMaterial 
+                    color="#ffffff"
+                    emissive="#ffffff"
+                    emissiveIntensity={0.3}
+                  />
+                </mesh>
+              </>
+            )}
+            
+            {/* Grass shoulders */}
             <mesh 
-              position={[-5, avgHeight, z - 1]} 
-              rotation={[-Math.PI / 2 + slope * 0.15, 0, 0]}
+              position={[-6, avgHeight - 0.1, z - 1.5]} 
+              rotation={[-Math.PI / 2 + slope * 0.8, 0, 0]}
             >
-              <planeGeometry args={[8, 2, 4, 4]} />
+              <planeGeometry args={[5, 3, 6, 6]} />
               <meshStandardMaterial 
                 color="#3a5f30"
-                roughness={0.9}
+                roughness={0.95}
               />
             </mesh>
             <mesh 
-              position={[5, avgHeight, z - 1]} 
-              rotation={[-Math.PI / 2 + slope * 0.15, 0, 0]}
+              position={[6, avgHeight - 0.1, z - 1.5]} 
+              rotation={[-Math.PI / 2 + slope * 0.8, 0, 0]}
             >
-              <planeGeometry args={[8, 2, 4, 4]} />
+              <planeGeometry args={[5, 3, 6, 6]} />
               <meshStandardMaterial 
                 color="#3a5f30"
-                roughness={0.9}
+                roughness={0.95}
               />
             </mesh>
+            
+            {/* Guard rails on steep sections */}
+            {Math.abs(slope) > 0.1 && (
+              <>
+                <mesh position={[-3.5, avgHeight + 0.3, z - 1.5]} castShadow>
+                  <boxGeometry args={[0.1, 0.6, 3]} />
+                  <meshStandardMaterial color="#888888" metalness={0.7} roughness={0.3} />
+                </mesh>
+                <mesh position={[3.5, avgHeight + 0.3, z - 1.5]} castShadow>
+                  <boxGeometry args={[0.1, 0.6, 3]} />
+                  <meshStandardMaterial color="#888888" metalness={0.7} roughness={0.3} />
+                </mesh>
+              </>
+            )}
           </group>
         );
       })}

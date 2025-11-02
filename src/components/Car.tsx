@@ -46,49 +46,104 @@ export const Car = ({ speed, isEngineOn, terrain, headlightsOn }: CarProps) => {
   
   return (
     <group ref={carRef} position={[0, 0.5, 0]}>
-      {/* Car body */}
-      <mesh castShadow>
-        <boxGeometry args={[2, 0.8, 4]} />
+      {/* Modern EV Body - Sleek aerodynamic design */}
+      <mesh castShadow position={[0, 0, 0]}>
+        <boxGeometry args={[1.9, 0.6, 4.2]} />
         <meshStandardMaterial 
           color="#00d9ff" 
-          metalness={0.8}
-          roughness={0.2}
-          emissive="#00d9ff"
-          emissiveIntensity={0.2}
-        />
-      </mesh>
-      
-      {/* Car cabin */}
-      <mesh position={[0, 0.6, -0.5]} castShadow>
-        <boxGeometry args={[1.8, 0.8, 2]} />
-        <meshStandardMaterial 
-          color="#001a33"
           metalness={0.9}
           roughness={0.1}
           emissive="#00d9ff"
+          emissiveIntensity={0.3}
+        />
+      </mesh>
+      
+      {/* Aerodynamic front bumper */}
+      <mesh position={[0, -0.15, 2.2]} castShadow>
+        <boxGeometry args={[1.9, 0.3, 0.3]} />
+        <meshStandardMaterial 
+          color="#00d9ff" 
+          metalness={0.9}
+          roughness={0.1}
+        />
+      </mesh>
+      
+      {/* Modern cabin with curved roof */}
+      <mesh position={[0, 0.5, -0.3]} castShadow>
+        <boxGeometry args={[1.8, 0.7, 2.2]} />
+        <meshStandardMaterial 
+          color="#0a1929"
+          metalness={0.8}
+          roughness={0.2}
+          emissive="#001a33"
           emissiveIntensity={0.1}
         />
       </mesh>
       
-      {/* Wheels */}
+      {/* Windshield */}
+      <mesh position={[0, 0.65, 0.8]} rotation={[-0.2, 0, 0]} castShadow>
+        <boxGeometry args={[1.7, 0.6, 0.1]} />
+        <meshStandardMaterial 
+          color="#1a3d5c"
+          metalness={0.5}
+          roughness={0.1}
+          transparent
+          opacity={0.7}
+        />
+      </mesh>
+      
+      {/* Rear window */}
+      <mesh position={[0, 0.6, -1.3]} rotation={[0.2, 0, 0]} castShadow>
+        <boxGeometry args={[1.7, 0.5, 0.1]} />
+        <meshStandardMaterial 
+          color="#1a3d5c"
+          metalness={0.5}
+          roughness={0.1}
+          transparent
+          opacity={0.7}
+        />
+      </mesh>
+      
+      {/* Side mirrors */}
+      <mesh position={[-1.0, 0.4, 0.5]} castShadow>
+        <boxGeometry args={[0.15, 0.15, 0.2]} />
+        <meshStandardMaterial color="#0a1929" metalness={0.8} roughness={0.2} />
+      </mesh>
+      <mesh position={[1.0, 0.4, 0.5]} castShadow>
+        <boxGeometry args={[0.15, 0.15, 0.2]} />
+        <meshStandardMaterial color="#0a1929" metalness={0.8} roughness={0.2} />
+      </mesh>
+      
+      {/* Wheels - Modern EV style */}
       {[
-        [-0.8, -0.3, 1.2],
-        [0.8, -0.3, 1.2],
-        [-0.8, -0.3, -1.2],
-        [0.8, -0.3, -1.2],
+        [-0.85, -0.25, 1.3],
+        [0.85, -0.25, 1.3],
+        [-0.85, -0.25, -1.3],
+        [0.85, -0.25, -1.3],
       ].map((pos, i) => (
-        <mesh
-          key={i}
-          position={pos as [number, number, number]}
-          rotation={[0, 0, Math.PI / 2]}
-          ref={(el) => {
-            if (el) wheelsRef.current[i] = el;
-          }}
-          castShadow
-        >
-          <cylinderGeometry args={[0.35, 0.35, 0.3, 16]} />
-          <meshStandardMaterial color="#1a1a2e" metalness={0.7} roughness={0.3} />
-        </mesh>
+        <group key={i}>
+          {/* Tire */}
+          <mesh
+            position={pos as [number, number, number]}
+            rotation={[0, 0, Math.PI / 2]}
+            ref={(el) => {
+              if (el) wheelsRef.current[i] = el;
+            }}
+            castShadow
+          >
+            <cylinderGeometry args={[0.38, 0.38, 0.35, 20]} />
+            <meshStandardMaterial color="#1a1a2e" metalness={0.6} roughness={0.4} />
+          </mesh>
+          {/* Rim */}
+          <mesh
+            position={pos as [number, number, number]}
+            rotation={[0, 0, Math.PI / 2]}
+            castShadow
+          >
+            <cylinderGeometry args={[0.25, 0.25, 0.36, 20]} />
+            <meshStandardMaterial color="#c0c0c0" metalness={0.95} roughness={0.1} />
+          </mesh>
+        </group>
       ))}
       
       {/* Headlights */}

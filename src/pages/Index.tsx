@@ -101,11 +101,11 @@ const Index = () => {
         return newBattery;
       });
       
-      // Update distance (speed in km/h, interval is 100ms)
+      // Update distance with 1km game = 10km real scale
       setDistance(prev => {
-        const newDistance = prev + (speed * 0.1) / 3600; // Convert to km
+        const newDistance = prev + ((speed * 0.1) / 3600) * 10; // Convert to km and apply 10x scale
         
-        // Check for charging station every 5 km
+        // Check for charging station every 5 km real
         if (Math.floor(newDistance / 5) > Math.floor(prev / 5)) {
           setSpeed(0);
           setIsCharging(true);
