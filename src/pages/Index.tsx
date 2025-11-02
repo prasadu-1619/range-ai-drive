@@ -105,8 +105,8 @@ const Index = () => {
       setDistance(prev => {
         const newDistance = prev + ((speed * 0.1) / 3600) * 10; // Convert to km and apply 10x scale
         
-        // Check for charging station every 5 km real
-        if (Math.floor(newDistance / 5) > Math.floor(prev / 5)) {
+        // Check for charging station every 50 km real (5 km game scale)
+        if (Math.floor(newDistance / 50) > Math.floor(prev / 50)) {
           setSpeed(0);
           setIsCharging(true);
           toast.success("🔋 Charging station reached! Time to recharge.");

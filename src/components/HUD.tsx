@@ -56,10 +56,10 @@ export const HUD = ({
   };
 
   const getRoadStatus = () => {
-    const nextStation = Math.ceil(distance / 5) * 5;
+    const nextStation = Math.ceil(distance / 50) * 50;
     const distanceToNext = nextStation - distance;
     
-    if (distanceToNext < 1) {
+    if (distanceToNext < 5) {
       return `⚡ Charging station in ${distanceToNext.toFixed(1)} km`;
     }
     return `Next station: ${distanceToNext.toFixed(1)} km`;

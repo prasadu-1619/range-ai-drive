@@ -23,11 +23,11 @@ export const Terrain = ({ terrain, speed }: TerrainProps) => {
     }
   });
   
-  // Create dynamic ground elevation for hills
+  // Create dynamic ground elevation for hills - smoother transitions
   const getGroundHeight = (z: number) => {
     if (terrain !== 'hills') return 0;
-    // Create wavy terrain for hills
-    return Math.sin(z * 0.1) * 3 + Math.cos(z * 0.15) * 2;
+    // Create smooth, realistic hills with gentler slopes
+    return Math.sin(z * 0.08) * 2.5 + Math.cos(z * 0.05) * 1.5;
   };
   
   if (terrain === 'city') {

@@ -16,36 +16,44 @@ export const Car = ({ speed, isEngineOn, terrain, headlightsOn }: CarProps) => {
   useFrame((state, delta) => {
     if (!carRef.current) return;
     
-    // Calculate terrain-based position for hills
+    // Calculate terrain-based position for hills with smoother transitions
     let baseY = 0.5;
-    if (terrain === 'hills' && isEngineOn && speed > 0) {
-      // Simulate going up and down hills
-      baseY = 0.5 + Math.sin(state.clock.elapsedTime * (speed / 50)) * 1.5;
+    let tiltAngle = 0;
+    
+    if (terrain === 'hills' && isEngineOn) {
+      // Smoother hill simulation with gradual slopes
+      const hillPhase = state.clock.elapsedTime * (speed / 80);
+      const hillHeight = Math.sin(hillPhase * 0.8) * 1.2 + Math.cos(hillPhase * 0.5) * 0.8;
+      baseY = 0.5 + hillHeight;
+      
+      // Calculate tilt based on hill slope
+      const slope = Math.cos(hillPhase * 0.8) * 0.8 * 0.8 - Math.sin(hillPhase * 0.5) * 0.8 * 0.5;
+      tiltAngle = slope * 0.15;
     }
     
-    // Subtle hovering animation
-    carRef.current.position.y = baseY + Math.sin(state.clock.elapsedTime * 2) * 0.02;
+    // Apply position with subtle hovering
+    carRef.current.position.y = baseY + Math.sin(state.clock.elapsedTime * 2) * 0.015;
     
-    // Rotate wheels based on speed and engine state
+    // Rotate wheels based on speed - FORWARD direction (negative rotation)
     if (isEngineOn && speed > 0) {
       const rotationSpeed = (speed / 50) * delta * 10;
       wheelsRef.current.forEach(wheel => {
         if (wheel) {
-          wheel.rotation.x += rotationSpeed;
+          wheel.rotation.x -= rotationSpeed; // Negative for forward motion
         }
       });
       
-      // Add tilt based on terrain and speed
+      // Apply tilt based on terrain
       if (terrain === 'hills') {
-        carRef.current.rotation.x = Math.sin(state.clock.elapsedTime * (speed / 50)) * 0.15 - speed * 0.001;
+        carRef.current.rotation.x = tiltAngle;
       } else {
-        carRef.current.rotation.x = -speed * 0.001;
+        carRef.current.rotation.x = -speed * 0.0008; // Slight forward lean
       }
     }
   });
   
   return (
-    <group ref={carRef} position={[0, 0.5, 0]}>
+    <group ref={carRef} position={[0, 0.5, 0]} rotation={[0, Math.PI, 0]}>
       {/* Modern EV Body - Sleek aerodynamic design */}
       <mesh castShadow position={[0, 0, 0]}>
         <boxGeometry args={[1.9, 0.6, 4.2]} />
@@ -65,6 +73,16 @@ export const Car = ({ speed, isEngineOn, terrain, headlightsOn }: CarProps) => {
           color="#00d9ff" 
           metalness={0.9}
           roughness={0.1}
+        />
+      </mesh>
+      
+      {/* Hood details - sporty lines */}
+      <mesh position={[0, 0.31, 1.5]} castShadow>
+        <boxGeometry args={[1.6, 0.02, 1.2]} />
+        <meshStandardMaterial 
+          color="#0099cc" 
+          metalness={0.95}
+          roughness={0.05}
         />
       </mesh>
       

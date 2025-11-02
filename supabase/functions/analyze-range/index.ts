@@ -52,8 +52,8 @@ serve(async (req) => {
     
     estimatedRange = Math.round(estimatedRange);
     
-    // Calculate next charging station
-    const nextStation = Math.ceil(distance / 5) * 5;
+    // Calculate next charging station (every 50 km)
+    const nextStation = Math.ceil(distance / 50) * 50;
     const distanceToNext = nextStation - distance;
     
     // Call Lovable AI (Gemini) for analysis
